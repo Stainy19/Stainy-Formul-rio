@@ -60,10 +60,10 @@ export function StainyLogo({ className = "" }: { className?: string }) {
 export default function App() {
   // Config States (stored in localStorage for easy user customization in the client side)
   const [supabaseUrl, setSupabaseUrl] = useState(() => {
-    return localStorage.getItem("stainy_supabase_url") || "https://SEU_PROJETO.supabase.co";
+    return localStorage.getItem("stainy_supabase_url") || "https://hpgyhjfqsuhehfbkaqxx.supabase.co/rest/v1/";
   });
   const [supabaseKey, setSupabaseKey] = useState(() => {
-    return localStorage.getItem("stainy_supabase_key") || "SUA_CHAVE_PUBLICA";
+    return localStorage.getItem("stainy_supabase_key") || "sb_publishable_RRLfaOwuMkWDUWTHStZQfA_pMga8Dnp";
   });
   const [youtubeVideoId, setYoutubeVideoId] = useState(() => {
     return localStorage.getItem("stainy_youtube_id") || "ScMzIvxBSi4";
@@ -175,8 +175,14 @@ export default function App() {
       let success = false;
 
       if (!isPlaceholder) {
+        // Remove trailing slashes dynamically to prevent PGRST125 double slash error
+        let cleanUrl = supabaseUrl.trim().replace(/\/+$/, "");
+        if (cleanUrl.endsWith("/rest/v1")) {
+          cleanUrl = cleanUrl.substring(0, cleanUrl.length - 8);
+        }
+        
         // Enviar os dados via fetch POST com headers adequados
-        const response = await fetch(`${supabaseUrl.trim()}/rest/v1/leads`, {
+        const response = await fetch(`${cleanUrl}/rest/v1/leads`, {
           method: 'POST',
           headers: {
             'apikey': supabaseKey.trim(),
@@ -294,14 +300,6 @@ export default function App() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setConfigDrawerOpen(true)}
-              className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-colors cursor-pointer"
-              title="Configurar Supabase & Chaves"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            
             <button 
               onClick={() => scrollTo(formRef)}
               className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-brand-sky hover:bg-blue-600 text-white font-semibold text-sm transition-all duration-300 shadow-[0_4px_14px_rgba(0,125,255,0.4)] hover:shadow-[0_6px_20px_rgba(0,125,255,0.6)] hover:-translate-y-0.5 cursor-pointer"
@@ -480,16 +478,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Setup Notice when defaults are active */}
-          {(supabaseUrl.includes("SEU_PROJETO") || supabaseKey.includes("SUA_CHAVE")) && (
-            <div className="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-yellow-300">
-                <span className="font-semibold block mb-0.5">Modo de Teste / Simulação Local Ativo</span>
-                As credenciais do Supabase estão configuradas com valores genéricos padrões. Seus envios serão registrados em uma lista de simulação local abaixo para testes. Para conectar a seu banco de produção Supabase real, clique na engrenagem de configurações no canto superior direito para aplicar o seu URL do Supabase e Anon Key.
-              </div>
-            </div>
-          )}
 
           {/* Form wrapper */}
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
