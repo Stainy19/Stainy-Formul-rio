@@ -66,7 +66,8 @@ export default function App() {
     return localStorage.getItem("stainy_supabase_key") || "sb_publishable_RRLfaOwuMkWDUWTHStZQfA_pMga8Dnp";
   });
   const [youtubeVideoId, setYoutubeVideoId] = useState(() => {
-    return localStorage.getItem("stainy_youtube_id") || "ScMzIvxBSi4";
+    const saved = localStorage.getItem("stainy_youtube_id");
+    return (!saved || saved === "ScMzIvxBSi4") ? "R2ZT_QXd7T4" : saved;
   });
 
   // UI States
@@ -104,6 +105,8 @@ export default function App() {
   const formRef = useRef<HTMLDivElement>(null);
   const quemSomosRef = useRef<HTMLDivElement>(null);
   const servicosRef = useRef<HTMLDivElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [isAutoplayActive, setIsAutoplayActive] = useState(false);
 
   // Monitor Scroll for Header blur effects
   useEffect(() => {
@@ -112,6 +115,30 @@ export default function App() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Intersection Observer to autoplay YouTube video when it enters viewport
+  useEffect(() => {
+    const currentRef = videoContainerRef.current;
+    if (!currentRef) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAutoplayActive(true);
+          observer.unobserve(currentRef); // Trigger once
+        }
+      },
+      {
+        threshold: 0.15, // trigger when 15% of the video container is visible
+      }
+    );
+
+    observer.observe(currentRef);
+
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
   }, []);
 
   // Save Config parameters
@@ -878,9 +905,9 @@ export default function App() {
               {/* Outer decorative glow lights offset */}
               <div className="absolute inset-0 bg-brand-sky/5 filter blur-xl rounded-2xl group-hover:bg-brand-sky/10 transition-colors pointer-events-none" />
               
-              <div className="video-wrapper overflow-hidden rounded-xl border border-white/5">
+              <div ref={videoContainerRef} className="video-wrapper overflow-hidden rounded-xl border border-white/5 relative">
                 <iframe 
-                  src={`https://www.youtube.com/embed/${youtubeVideoId}`} 
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=${isAutoplayActive ? "1" : "0"}&mute=1&controls=1&modestbranding=1&rel=0&playlist=${youtubeVideoId}&loop=1`} 
                   title="Stainy Filmes — Showreel Oficial" 
                   frameBorder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -986,12 +1013,9 @@ export default function App() {
 
             </div>
 
-            {/* CARD 2: DESTAQUE (MOST POPULAR) */}
-            <div className="bg-[#0b0b18]/80 backdrop-blur-md rounded-2xl border-2 border-brand-sky p-8 flex flex-col justify-between transition-all duration-300 hover:translate-y-[-4px] relative shadow-[0_15px_30px_rgba(0,125,255,0.15)] group">
-              {/* Highlight Ribbon */}
-              <div className="absolute top-[-14px] left-[50%] -translate-x-1/2 px-4 py-1 rounded bg-brand-sky text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg animate-pulse">
-                MAIS REQUISITADO
-              </div>
+            {/* CARD 2: DESTAQUE */}
+            <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/5 p-8 flex flex-col justify-between transition-all duration-300 hover:border-white/10 hover:translate-y-[-4px] group relative shadow-xl">
+              <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               
               <div>
                 {/* Active Tag */}
@@ -1000,15 +1024,15 @@ export default function App() {
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2">CÁPSULA DESTAQUE</h3>
-                <p className="text-xs italic text-gray-300 font-light mb-6">"Impacto • Presença • Cinematografia"</p>
+                <p className="text-xs italic text-gray-450 font-light mb-6">"Impacto • Presença • Cinematografia"</p>
 
                 {/* Features list */}
-                <div className="space-y-4 border-t border-white/10 pt-6 text-sm">
+                <div className="space-y-4 border-t border-white/5 pt-6 text-sm">
                   <div className="flex items-start gap-3">
                     <Video className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Institucional & Vida</h4>
-                      <p className="text-xs text-gray-300 mt-1">Filme de origem de alta comoção focado na conexão religiosa e social.</p>
+                      <p className="text-xs text-gray-400 mt-1">Filme de origem de alta comoção focado na conexão religiosa e social.</p>
                     </div>
                   </div>
 
@@ -1016,7 +1040,7 @@ export default function App() {
                     <Building2 className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Vídeo de Obras</h4>
-                      <p className="text-xs text-gray-300 mt-1">Validação das melhorias e conquistas obtidas pela liderança na região do Ceará.</p>
+                      <p className="text-xs text-gray-400 mt-1">Validação das melhorias e conquistas obtidas pela liderança na região do Ceará.</p>
                     </div>
                   </div>
 
@@ -1024,7 +1048,7 @@ export default function App() {
                     <Award className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Pedido de Voto</h4>
-                      <p className="text-xs text-gray-300 mt-1">Formatos de 30s/60s para tráfego pago com copys de alto poder reflexivo.</p>
+                      <p className="text-xs text-gray-400 mt-1">Formatos de 30s/60s para tráfego pago com copys de alto poder reflexivo.</p>
                     </div>
                   </div>
 
@@ -1032,81 +1056,7 @@ export default function App() {
                     <Music className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Vídeo Clipe Musical</h4>
-                      <p className="text-xs text-gray-300 mt-1">A versão do jingle da campanha em videoclipe ultra-dinâmico editado para explosão no digital.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Includes block bottom */}
-              <div className="mt-8 pt-6 border-t border-white/10 space-y-6">
-                <div className="bg-brand-sky/[0.04] p-3 rounded-lg border border-brand-sky/20">
-                  <p className="text-[10px] font-bold tracking-wider text-brand-sky uppercase">Incluso na cápsula:</p>
-                  <p className="text-xs text-gray-200 mt-1.5 font-semibold leading-relaxed">
-                    Captação avançada em 6K • Drone tático militar • Motion Graphics premium • Grade completa de materiais verticais (TikTok/Reles) e horizontais (YouTube)
-                  </p>
-                </div>
-
-                <button 
-                  onClick={() => scrollTo(formRef)}
-                  className="w-full py-4 px-4 rounded-xl text-center text-xs font-bold text-white bg-brand-sky hover:bg-blue-600 transition-all duration-300 shadow-[0_4px_12px_rgba(0,125,255,0.4)] hover:-translate-y-0.5 cursor-pointer"
-                >
-                  Quero este plano
-                </button>
-              </div>
-
-            </div>
-
-            {/* CARD 3: VENCEDORA */}
-            <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/5 p-8 flex flex-col justify-between transition-all duration-300 hover:border-white/10 hover:translate-y-[-4px] group relative shadow-xl">
-              <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              
-              <div>
-                {/* Active Tag */}
-                <div className="flex items-center gap-1 text-[10px] text-blue-300 font-bold tracking-widest uppercase mb-4 py-1 px-2.5 rounded bg-blue-500/10 w-fit">
-                  NÍVEL III • DOMÍNIO TOTAL
-                </div>
-
-                <h3 className="text-xl font-bold text-white mb-2">CÁPSULA VENCEDORA</h3>
-                <p className="text-xs italic text-gray-450 font-light mb-6">"Movimento • Força • Domínio Digital"</p>
-
-                {/* Features list */}
-                <div className="space-y-3.5 border-t border-white/5 pt-6 text-sm">
-                  <div className="flex items-start gap-2.5">
-                    <Video className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
-                    <p className="text-xs text-gray-400 mt-0.5">Institucional & Vida de alta produção narrativa.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Building2 className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
-                    <p className="text-xs text-gray-400 mt-0.5">Vídeos de Obras estruturados em multiplas frentes.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Award className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
-                    <p className="text-xs text-gray-400 mt-0.5">Conjunto de Pedidos de Voto por temas municipais específicos.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Music className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
-                    <p className="text-xs text-gray-400 mt-0.5">Vídeo Clipe Musical em alta cadência com militância.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Camera className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Equipe Filmmaker In-Loco</h4>
-                      <p className="text-[11px] text-gray-400">Cobertura tática presencial ágil de até 5 eventos ou agendas políticas determinantes.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Smartphone className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Storymaker Full Time</h4>
-                      <p className="text-[11px] text-gray-400">Acompanhamento diário em tempo integral da rotina e bastidores da liderança político-executiva.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <Brain className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Gestão Estratégica</h4>
-                      <p className="text-[11px] text-gray-400">Planejamento e direcionamento criativo macro, analisando tendências e métricas digitais para ação imediata.</p>
+                      <p className="text-xs text-gray-400 mt-1">A versão do jingle da campanha em videoclipe ultra-dinâmico editado para explosão no digital.</p>
                     </div>
                   </div>
                 </div>
@@ -1117,13 +1067,90 @@ export default function App() {
                 <div className="bg-white/[0.02] p-3 rounded-lg border border-white/5">
                   <p className="text-[10px] font-bold tracking-wider text-gray-500 uppercase">Incluso na cápsula:</p>
                   <p className="text-xs text-gray-300 mt-1.5 font-medium leading-relaxed">
-                    Captação cinema 6K • Drone FPV de alta velocidade • Produtor e Coordenador de audiovisual tático • Entregas rápidas no formato D+0 • Suporte estúdio móvel premium
+                    Captação avançada em 6K • Drone tático militar • Motion Graphics premium • Grade completa de materiais verticais (TikTok/Reles) e horizontais (YouTube)
                   </p>
                 </div>
 
                 <button 
                   onClick={() => scrollTo(formRef)}
                   className="w-full py-3 px-4 rounded-xl text-center text-xs font-bold text-brand-sky transition-all duration-300 border border-brand-sky/20 hover:bg-brand-sky/10 group-hover:border-brand-sky hover:-translate-y-0.5 cursor-pointer"
+                >
+                  Quero este plano
+                </button>
+              </div>
+
+            </div>
+
+            {/* CARD 3: VENCEDORA */}
+            <div className="bg-[#0b0b18]/80 backdrop-blur-md rounded-2xl border-2 border-brand-sky p-8 flex flex-col justify-between transition-all duration-300 hover:translate-y-[-4px] relative shadow-[0_15px_30px_rgba(0,125,255,0.15)] group">
+              {/* Highlight Ribbon */}
+              <div className="absolute top-[-14px] left-[50%] -translate-x-1/2 px-4 py-1 rounded bg-brand-sky text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg animate-pulse">
+                MAIS REQUISITADO
+              </div>
+              
+              <div>
+                {/* Active Tag */}
+                <div className="flex items-center gap-1 text-[10px] text-brand-sky font-bold tracking-widest uppercase mb-4 py-1 px-2.5 rounded bg-brand-sky/10 w-fit">
+                  NÍVEL III • DOMÍNIO TOTAL
+                </div>
+
+                <h3 className="text-xl font-bold text-white mb-2">CÁPSULA VENCEDORA</h3>
+                <p className="text-xs italic text-gray-350 font-light mb-6">"Movimento • Força • Domínio Digital"</p>
+
+                {/* Features list */}
+                <div className="space-y-3.5 border-t border-white/10 pt-6 text-sm">
+                  <div className="flex items-start gap-2.5">
+                    <Video className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
+                    <p className="text-xs text-gray-300 mt-0.5">Institucional & Vida de alta produção narrativa.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Building2 className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
+                    <p className="text-xs text-gray-300 mt-0.5">Vídeos de Obras estruturados em multiplas frentes.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Award className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
+                    <p className="text-xs text-gray-300 mt-0.5">Conjunto de Pedidos de Voto por temas municipais específicos.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Music className="w-4 h-4 text-brand-sky mt-0.5 shrink-0" />
+                    <p className="text-xs text-gray-300 mt-0.5">Vídeo Clipe Musical em alta cadência com militância.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Camera className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Equipe Filmmaker In-Loco</h4>
+                      <p className="text-[11px] text-gray-300">Cobertura tática presencial ágil de até 5 eventos ou agendas políticas determinantes.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Smartphone className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Storymaker Full Time</h4>
+                      <p className="text-[11px] text-gray-300">Acompanhamento diário em tempo integral da rotina e bastidores da liderança político-executiva.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Brain className="w-4 h-4 text-brand-sky mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-white text-xs uppercase tracking-wide">Gestão Estratégica</h4>
+                      <p className="text-[11px] text-gray-300">Planejamento e direcionamento criativo macro, analisando tendências e métricas digitais para ação imediata.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Includes block bottom */}
+              <div className="mt-8 pt-6 border-t border-white/10 space-y-6">
+                <div className="bg-brand-sky/[0.04] p-3 rounded-lg border border-brand-sky/20">
+                  <p className="text-[10px] font-bold tracking-wider text-brand-sky uppercase">Incluso na cápsula:</p>
+                  <p className="text-xs text-gray-200 mt-1.5 font-semibold leading-relaxed">
+                    Captação cinema 6K • Drone FPV de alta velocidade • Produtor e Coordenador de audiovisual tático • Entregas rápidas no formato D+0 • Suporte estúdio móvel premium
+                  </p>
+                </div>
+
+                <button 
+                  onClick={() => scrollTo(formRef)}
+                  className="w-full py-4 px-4 rounded-xl text-center text-xs font-bold text-white bg-brand-sky hover:bg-blue-600 transition-all duration-300 shadow-[0_4px_12px_rgba(0,125,255,0.4)] hover:-translate-y-0.5 cursor-pointer"
                 >
                   Quero este plano
                 </button>
@@ -1146,8 +1173,8 @@ export default function App() {
             Mantra Estratégico
           </span>
           <h2 className="text-2xl md:text-5xl font-display font-extrabold text-white leading-tight uppercase tracking-tight">
-            "POSICIONAMENTO NÃO ACONTECE POR ACASO. <br />
-            ELE É CONSTRUÍDO COM ESTRATÉGIA."
+            “A IMAGEM QUE VENCE UMA ELEIÇÃO <br />
+            É CONSTRUÍDA ANTES MESMO DO PRIMEIRO VOTO.”
           </h2>
           <div className="w-16 h-0.5 bg-brand-sky mx-auto" />
           <p className="text-gray-400 font-light text-sm md:text-base tracking-wide">
@@ -1304,7 +1331,7 @@ export default function App() {
                       className="w-full bg-[#04040a] border border-white/10 rounded-lg p-3 text-xs text-white"
                       value={youtubeVideoId}
                       onChange={(e) => setYoutubeVideoId(e.target.value)}
-                      placeholder="Ex: ScMzIvxBSi4 ou dQw4w9WgXcQ"
+                      placeholder="Ex: R2ZT_QXd7T4 ou dQw4w9WgXcQ"
                     />
                     <p className="text-[10px] text-gray-500 leading-relaxed font-light">
                       Substitua com o ID de vídeo de sua preferência para renderizar o seu respectivo vídeo cinematográfico na seção Quem Somos.
