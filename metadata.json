@@ -1,0 +1,6 @@
+{
+  "name": "Stainy Filmes",
+  "description": "Landing page premium e formulário de qualificação estratégica para a Stainy Filmes - especialistas em produções audiovisuais políticas e corporativas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
